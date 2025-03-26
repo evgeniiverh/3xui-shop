@@ -65,6 +65,9 @@ class NavAdminTools(str, Enum):
     SYNC_SERVERS = "sync_servers"
     STATISTICS = "statistics"
     USER_EDITOR = "user_editor"
+    SEARCH_USER = "search_user"
+    SHOW_USER_INFO = "show_user_info"
+    USER_EDITOR_BACK = "user_editor_back"
 
     PROMOCODE_EDITOR = "promocode_editor"
     CREATE_PROMOCODE = "create_promocode"

@@ -1105,3 +1105,61 @@ msgstr[0] "1 месяц"
 msgstr[1] "{} месяца"
 msgstr[2] "{} месяцев"
 
+#: app/bot/routers/admin_tools/user_handler.py:35
+msgid "user_editor:message:main"
+msgstr "🔍 Выберите действие для работы с пользователями:"
+
+#: app/bot/routers/admin_tools/user_handler.py:39
+msgid "user_editor:message:enter_user_id"
+msgstr "Введите ID пользователя:"
+
+#: app/bot/routers/admin_tools/user_handler.py:95
+msgid "user_editor:message:user_info"
+msgstr ""
+"ℹ️ Информация о пользователе:\n"
+"\n"
+"🆔 ID: {user_id}\n"
+"👤 Имя: {first_name}\n"
+"🏷 Username: {username}\n"
+"📅 Дата регистрации: {created_at}\n"
+"🌐 Язык: {language}\n"
+"\n"
+"📊 Статус подписки: {subscription_status}\n"
+"🖥 Сервер: {server}\n"
+"🎁 Пробный период использован: {trial_used}\n"
+"\n"
+"{referral_info}\n"
+"{promocodes_info}"
+
+#: app/bot/routers/admin_tools/keyboard.py:275
+msgid "user_editor:button:search_user"
+msgstr "🔍 Найти пользователя"
+
+#: app/bot/routers/admin_tools/user_handler.py:71
+msgid "user_editor:error:invalid_user_id"
+msgstr "❌ Некорректный ID пользователя. Пожалуйста, введите числовое значение."
+
+#: app/bot/routers/admin_tools/user_handler.py:77
+msgid "user_editor:error:user_not_found"
+msgstr "❌ Пользователь не найден."
+
+#: app/bot/routers/admin_tools/user_handler.py:87
+msgid "user_editor:status:active_subscription"
+msgstr "✅ Активная подписка"
+
+#: app/bot/routers/admin_tools/user_handler.py:86
+msgid "user_editor:status:no_subscription"
+msgstr "❌ Нет активной подписки"
+
+#: app/bot/routers/admin_tools/user_handler.py:92
+msgid "user_editor:referral:invited_by"
+msgstr "👥 Приглашен пользователем {referrer_id} ({date})"
+
+#: app/bot/routers/admin_tools/user_handler.py:98
+msgid "user_editor:referral:invited_users"
+msgstr "🤝 Пригласил пользователей: {count}"
+
+#: app/bot/routers/admin_tools/user_handler.py:103
+msgid "user_editor:promocodes:used"
+msgstr "🎟 Использованные промокоды: {codes}"
+

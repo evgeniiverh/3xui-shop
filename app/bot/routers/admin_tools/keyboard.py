@@ -267,3 +267,17 @@ def confirm_send_notification_keyboard() -> InlineKeyboardMarkup:
     )
     builder.row(cancel_button(NavAdminTools.NOTIFICATION))
     return builder.as_markup()
+
+
+def user_editor_keyboard() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    
+    builder.row(
+        InlineKeyboardButton(
+            text=_("user_editor:button:search_user"),
+            callback_data=NavAdminTools.SEARCH_USER,
+        )
+    )
+    
+    builder.row(back_button(NavAdminTools.MAIN))
+    return builder.as_markup()
