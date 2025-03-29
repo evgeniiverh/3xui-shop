@@ -31,6 +31,7 @@ class User(Base):
         activated_promocodes (list[Promocode]): List of promocodes activated by the user.
         referrals_sent (list[Referral]): List of Referrals sent by the user and applied by referred users.
         referral (Referral | None): The Referral record if this user was invited.
+        is_blocked (bool): Whether the user is blocked.
     """
 
     __tablename__ = "users"
@@ -49,6 +50,7 @@ class User(Base):
         default=DEFAULT_LANGUAGE,
     )
     created_at: Mapped[datetime] = mapped_column(default=func.now(), nullable=False)
+    is_blocked: Mapped[bool] = mapped_column(default=False, nullable=False)
     server: Mapped["Server | None"] = relationship("Server", back_populates="users", uselist=False)  # type: ignore
     transactions: Mapped[list["Transaction"]] = relationship("Transaction", back_populates="user")  # type: ignore
     activated_promocodes: Mapped[list["Promocode"]] = relationship(  # type: ignore
@@ -166,4 +168,40 @@ class User(Base):
         )
         await session.commit()
         logger.info(f"Trial status updated for user {tg_id}: {used}")
+        return True
+
+    @classmethod
+    async def update_block_status(cls, session: AsyncSession, tg_id: int, blocked: bool, server_id: int | None = None) -> bool:
+        """
+        Updates the block status of a user and optionally changes their server.
+
+        Args:
+            session (AsyncSession): Database session.
+            tg_id (int): Telegram user ID.
+            blocked (bool): Whether the user should be blocked.
+            server_id (int | None, optional): Server ID to set. If None and blocking, removes server.
+
+        Returns:
+            bool: True if updated, False otherwise.
+        """
+        user = await cls.get(session=session, tg_id=tg_id)
+
+        if not user:
+            logger.warning(f"User {tg_id} not found to update block status.")
+            return False
+
+        update_values = {"is_blocked": blocked}
+        
+        # При блокировке отключаем сервер
+        if blocked:
+            update_values["server_id"] = None
+        # При разблокировке восстанавливаем сервер, если он указан
+        elif server_id is not None:
+            update_values["server_id"] = server_id
+
+        await session.execute(
+            update(User).where(User.tg_id == tg_id).values(**update_values)
+        )
+        await session.commit()
+        logger.info(f"Block status updated for user {tg_id}: {blocked} (server_id: {server_id})")
         return True

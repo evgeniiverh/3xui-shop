@@ -1127,9 +1127,16 @@ msgstr ""
 "📊 Статус подписки: {subscription_status}\n"
 "🖥 Сервер: {server}\n"
 "🎁 Пробный период использован: {trial_used}\n"
+"👤 Статус пользователя: {user_status}\n"
 "\n"
+"👥 Информация о рефералах:\n"
 "{referral_info}\n"
-"{promocodes_info}"
+"\n"
+"🎟 История промокодов:\n"
+"{promocodes_info}\n"
+"\n"
+"💳 История платежей:\n"
+"{payments_info}"
 
 #: app/bot/routers/admin_tools/keyboard.py:275
 msgid "user_editor:button:search_user"
@@ -1163,3 +1170,54 @@ msgstr "🤝 Пригласил пользователей: {count}"
 msgid "user_editor:promocodes:used"
 msgstr "🎟 Использованные промокоды: {codes}"
 
+#: app/bot/routers/admin_tools/user_handler.py:110
+msgid "user_editor:button:block_user"
+msgstr "🚫 Заблокировать"
+
+#: app/bot/routers/admin_tools/user_handler.py:111
+msgid "user_editor:button:unblock_user"
+msgstr "✅ Разблокировать"
+
+#: app/bot/routers/admin_tools/user_handler.py:115
+msgid "user_editor:message:user_blocked"
+msgstr "🚫 Пользователь {user_id} был заблокирован"
+
+#: app/bot/routers/admin_tools/user_handler.py:116
+msgid "user_editor:message:user_unblocked"
+msgstr "✅ Пользователь {user_id} был разблокирован"
+
+#: app/bot/routers/admin_tools/user_handler.py:117
+msgid "user_editor:message:block_failed"
+msgstr "❌ Не удалось изменить статус блокировки пользователя"
+
+#: app/bot/routers/admin_tools/user_handler.py:120
+msgid "user_editor:status:user_blocked"
+msgstr "🚫 Пользователь заблокирован"
+
+#: app/bot/routers/admin_tools/user_handler.py:121
+msgid "user_editor:status:user_active"
+msgstr "✅ Пользователь активен"
+
+#: app/bot/routers/admin_tools/user_handler.py:122
+msgid "user_editor:referral:statistics"
+msgstr "📊 Всего приглашено: {total_count}\n👥 Активных рефералов: {active_count}\n💰 Общая сумма вознаграждений: {total_rewards}"
+
+#: app/bot/routers/admin_tools/user_handler.py:123
+msgid "user_editor:promocodes:history"
+msgstr "История использованных промокодов:\n{codes}"
+
+#: app/bot/routers/admin_tools/user_handler.py:124
+msgid "user_editor:payments:history"
+msgstr "История платежей:\n{payments}"
+
+#: app/bot/routers/admin_tools/user_handler.py:125
+msgid "user_editor:payments:entry"
+msgstr "🧾 ID платежа: {id}\n💰 Сумма: {amount} {currency}\n📊 Статус: {status}\n📅 Дата: {date}\n⏳ Длительность: {duration}\n📱 Устройств: {devices}"
+
+#: app/bot/routers/admin_tools/user_handler.py:126
+msgid "user_editor:notification:user_blocked"
+msgstr "❌ Ваш аккаунт был заблокирован администратором.\n\nВаша подписка деактивирована, доступ к VPN отключен.\n\nЕсли вы считаете, что это ошибка, пожалуйста, свяжитесь с поддержкой."
+
+#: app/bot/routers/admin_tools/user_handler.py:127
+msgid "user_editor:notification:user_unblocked"
+msgstr "✅ Ваш аккаунт был разблокирован администратором.\n\nВы можете возобновить использование сервиса, приобретя новую подписку."

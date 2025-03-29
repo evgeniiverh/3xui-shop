@@ -13,8 +13,9 @@ from app.bot.models import ServicesContainer
 from app.bot.utils.constants import MAIN_MESSAGE_ID_KEY
 from app.bot.utils.navigation import NavAdminTools
 from app.db.models import User
+from app.bot.routers.misc.keyboard import back_keyboard
 
-from .keyboard import user_editor_keyboard, back_keyboard
+from .keyboard import user_editor_keyboard, user_info_keyboard
 
 logger = logging.getLogger(__name__)
 router = Router(name=__name__)
@@ -84,7 +85,14 @@ async def process_user_id(message: Message, state: FSMContext, session: AsyncSes
     subscription_status = _("user_editor:status:no_subscription")
     if target_user.server:
         subscription_status = _("user_editor:status:active_subscription")
+    elif target_user.is_blocked:
+        subscription_status = _("user_editor:status:blocked_subscription")
 
+    user_status = _("user_editor:status:user_active")
+    if target_user.is_blocked:
+        user_status = _("user_editor:status:user_blocked")
+
+    # Информация о рефералах
     referral_info = ""
     if target_user.referral:
         referral_info = _("user_editor:referral:invited_by").format(
@@ -92,15 +100,50 @@ async def process_user_id(message: Message, state: FSMContext, session: AsyncSes
             date=target_user.referral.created_at.strftime("%Y-%m-%d %H:%M:%S")
         )
     
+    # Статистика по рефералам
     referrals_count = len(target_user.referrals_sent)
+    active_referrals = sum(1 for ref in target_user.referrals_sent if ref.referred and ref.referred.server_id is not None)
+    total_rewards = sum(reward.amount for reward in target_user.referral_rewards) if hasattr(target_user, 'referral_rewards') else 0
+    
     if referrals_count > 0:
-        referral_info += "\n" + _("user_editor:referral:invited_users").format(count=referrals_count)
+        referral_info += "\n" + _("user_editor:referral:statistics").format(
+            total_count=referrals_count,
+            active_count=active_referrals,
+            total_rewards=total_rewards
+        )
 
+    # История промокодов
     promocodes_info = ""
     if target_user.activated_promocodes:
-        promocodes = [f"{p.code} ({p.duration} days)" for p in target_user.activated_promocodes]
-        promocodes_info = _("user_editor:promocodes:used").format(
-            codes=", ".join(promocodes)
+        promocodes = []
+        for p in target_user.activated_promocodes:
+            promocode_info = _("user_editor:promocodes:entry").format(
+                code=p.code,
+                duration=p.duration,
+                activation_date=p.activated_at.strftime("%Y-%m-%d %H:%M:%S") if hasattr(p, 'activated_at') else 'N/A'
+            )
+            promocodes.append(promocode_info)
+        promocodes_info = _("user_editor:promocodes:history").format(
+            codes="\n".join(promocodes)
+        )
+
+    # История платежей
+    payments_info = ""
+    if target_user.transactions:
+        payments = []
+        for t in target_user.transactions:
+            payment_info = _("user_editor:payments:entry").format(
+                id=t.payment_id,
+                amount=t.amount,
+                currency=t.currency,
+                status=t.status,
+                date=t.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                duration=t.duration,
+                devices=t.devices
+            )
+            payments.append(payment_info)
+        payments_info = _("user_editor:payments:history").format(
+            payments="\n".join(payments)
         )
 
     text = _("user_editor:message:user_info").format(
@@ -113,12 +156,91 @@ async def process_user_id(message: Message, state: FSMContext, session: AsyncSes
         language=target_user.language_code,
         trial_used=_("global:yes") if target_user.is_trial_used else _("global:no"),
         referral_info=referral_info,
-        promocodes_info=promocodes_info
+        promocodes_info=promocodes_info,
+        payments_info=payments_info,
+        user_status=user_status
     )
 
     await message.bot.edit_message_text(
         text=text,
         chat_id=message.chat.id,
         message_id=main_message_id,
-        reply_markup=back_keyboard(NavAdminTools.USER_EDITOR_BACK),
+        reply_markup=user_info_keyboard(target_user.tg_id, target_user.is_blocked),
     )
+
+
+@router.callback_query(F.data.startswith(NavAdminTools.BLOCK_USER), IsAdmin())
+async def callback_block_user(
+    callback: CallbackQuery, 
+    session: AsyncSession, 
+    state: FSMContext,
+    services: ServicesContainer
+) -> None:
+    user_id = int(callback.data.split("_")[1])
+    target_user = await User.get(session=session, tg_id=user_id)
+    
+    if not target_user:
+        await callback.answer(_("user_editor:error:user_not_found"))
+        return
+    
+    # Сохраняем предыдущий сервер для возможной разблокировки
+    previous_server_id = target_user.server_id
+    
+    # Если у пользователя есть сервер, удаляем его VPN
+    if target_user.server:
+        try:
+            await services.vpn_manager.delete_client(
+                server=target_user.server,
+                vpn_id=target_user.vpn_id
+            )
+        except Exception as e:
+            logger.error(f"Failed to delete VPN for user {user_id}: {e}")
+            await callback.answer(_("user_editor:message:block_failed"))
+            return
+    
+    # Блокируем пользователя и отключаем его подписку
+    success = await User.update_block_status(session=session, tg_id=user_id, blocked=True, server_id=None)
+    
+    if success:
+        # Отправляем уведомление пользователю
+        try:
+            await callback.bot.send_message(
+                chat_id=user_id,
+                text=_("user_editor:notification:user_blocked")
+            )
+        except Exception as e:
+            logger.error(f"Failed to send block notification to user {user_id}: {e}")
+
+        await callback.answer(_("user_editor:message:user_blocked").format(user_id=user_id))
+        target_user = await User.get(session=session, tg_id=user_id)
+        if target_user:
+            await process_user_id(callback.message, state, session)
+    else:
+        await callback.answer(_("user_editor:message:block_failed"))
+
+
+@router.callback_query(F.data.startswith(NavAdminTools.UNBLOCK_USER), IsAdmin())
+async def callback_unblock_user(
+    callback: CallbackQuery, 
+    session: AsyncSession, 
+    state: FSMContext
+) -> None:
+    user_id = int(callback.data.split("_")[1])
+    success = await User.update_block_status(session=session, tg_id=user_id, blocked=False)
+    
+    if success:
+        # Отправляем уведомление пользователю
+        try:
+            await callback.bot.send_message(
+                chat_id=user_id,
+                text=_("user_editor:notification:user_unblocked")
+            )
+        except Exception as e:
+            logger.error(f"Failed to send unblock notification to user {user_id}: {e}")
+
+        await callback.answer(_("user_editor:message:user_unblocked").format(user_id=user_id))
+        target_user = await User.get(session=session, tg_id=user_id)
+        if target_user:
+            await process_user_id(callback.message, state, session)
+    else:
+        await callback.answer(_("user_editor:message:block_failed"))

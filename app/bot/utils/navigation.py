@@ -68,6 +68,8 @@ class NavAdminTools(str, Enum):
     SEARCH_USER = "search_user"
     SHOW_USER_INFO = "show_user_info"
     USER_EDITOR_BACK = "user_editor_back"
+    BLOCK_USER = "block_user"
+    UNBLOCK_USER = "unblock_user"
 
     PROMOCODE_EDITOR = "promocode_editor"
     CREATE_PROMOCODE = "create_promocode"

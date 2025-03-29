@@ -1150,3 +1150,39 @@ msgstr "🤝 Invited users: {count}"
 msgid "user_editor:promocodes:used"
 msgstr "🎟 Used promocodes: {codes}"
 
+#: app/bot/routers/admin_tools/user_handler.py:110
+msgid "user_editor:button:block_user"
+msgstr "🚫 Block"
+
+#: app/bot/routers/admin_tools/user_handler.py:111
+msgid "user_editor:button:unblock_user"
+msgstr "✅ Unblock"
+
+#: app/bot/routers/admin_tools/user_handler.py:115
+msgid "user_editor:message:user_blocked"
+msgstr "🚫 User {user_id} has been blocked"
+
+#: app/bot/routers/admin_tools/user_handler.py:116
+msgid "user_editor:message:user_unblocked"
+msgstr "✅ User {user_id} has been unblocked"
+
+#: app/bot/routers/admin_tools/user_handler.py:117
+msgid "user_editor:message:block_failed"
+msgstr "❌ Failed to change user block status"
+
+#: app/bot/routers/admin_tools/user_handler.py:120
+msgid "user_editor:status:user_blocked"
+msgstr "🚫 User is blocked"
+
+#: app/bot/routers/admin_tools/user_handler.py:121
+msgid "user_editor:status:user_active"
+msgstr "✅ User is active"
+
+#: app/bot/routers/admin_tools/user_handler.py:122
+msgid "user_editor:notification:user_blocked"
+msgstr "❌ Your account has been blocked by the administrator.\n\nYour subscription has been deactivated and VPN access has been disabled.\n\nIf you believe this is an error, please contact support."
+
+#: app/bot/routers/admin_tools/user_handler.py:123
+msgid "user_editor:notification:user_unblocked"
+msgstr "✅ Your account has been unblocked by the administrator.\n\nYou can resume using the service by purchasing a new subscription."
+

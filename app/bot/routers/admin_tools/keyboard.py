@@ -281,3 +281,35 @@ def user_editor_keyboard() -> InlineKeyboardMarkup:
     
     builder.row(back_button(NavAdminTools.MAIN))
     return builder.as_markup()
+
+
+def user_info_keyboard(user_id: int, is_blocked: bool) -> InlineKeyboardMarkup:
+    """
+    Creates a keyboard for user information with block/unblock buttons.
+
+    Args:
+        user_id (int): The user's Telegram ID.
+        is_blocked (bool): Whether the user is currently blocked.
+
+    Returns:
+        InlineKeyboardMarkup: The keyboard markup.
+    """
+    builder = InlineKeyboardBuilder()
+
+    if is_blocked:
+        builder.row(
+            InlineKeyboardButton(
+                text=_("user_editor:button:unblock_user"),
+                callback_data=f"{NavAdminTools.UNBLOCK_USER}_{user_id}",
+            )
+        )
+    else:
+        builder.row(
+            InlineKeyboardButton(
+                text=_("user_editor:button:block_user"),
+                callback_data=f"{NavAdminTools.BLOCK_USER}_{user_id}",
+            )
+        )
+
+    builder.row(back_button(NavAdminTools.USER_EDITOR_BACK))
+    return builder.as_markup()
